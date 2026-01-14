@@ -130,6 +130,8 @@
 \bcaméra\b
 \bquality\b
 \bgen\s*\d+\b
+\bshitcam\b
+\blowcam\b
 
 [google-car]
 # Voitures Google et équipements
