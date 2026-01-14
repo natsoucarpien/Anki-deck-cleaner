@@ -27,6 +27,8 @@
 \bpavement\b
 \bpavé\b
 \bhouse\b
+\bhay\b
+\bhaystacks\b
 
 [architecture]
 # Architecture spécifique des bâtiments
