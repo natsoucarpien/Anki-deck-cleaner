@@ -29,6 +29,24 @@ Vous devriez voir quelque chose comme `Python 3.x.x`. Si ce n'est pas le cas, [t
 
 Placez le fichier `anki_deck_cleaner.py` dans un dossier de votre choix.
 
+## 📤 Exporter votre deck depuis Anki
+
+Avant d'utiliser le script, vous devez exporter votre deck depuis Anki avec les bons paramètres.
+
+### Étapes d'export
+
+1. Dans Anki, cliquez sur **Fichier** → **Exporter...**
+2. Configurez les options comme suit :
+   - **Format d'exportation** : Paquet de paquets Anki (.apkg)
+   - **Inclure** : Sélectionnez le deck que vous souhaitez nettoyer
+   - ✅ **Cochez** : "Gérer la compatibilité avec les versions antérieures d'Anki"
+
+![Paramètres d'export Anki](claude/clean%20export.png)
+
+> **Important** : L'option de compatibilité (encadrée en rouge) est **obligatoire** pour que le script puisse lire correctement la base de données du deck.
+
+3. Cliquez sur **Exporter...** et choisissez l'emplacement de sauvegarde
+
 ## 💻 Utilisation
 
 ### Méthode 1 : Mode interactif (recommandé pour les débutants)
