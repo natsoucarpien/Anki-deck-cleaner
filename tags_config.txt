@@ -154,6 +154,19 @@
 # NATURE ET ENVIRONNEMENT
 # ============================================================
 
+[weather]
+# Météo et conditions atmosphériques
+\bweather\b
+\bsmoke\b
+\bovercast\b
+\bcloudy\b
+\bfog\b
+\bfoggy\b
+\brain\b
+\brainy\b
+\bsnow\b
+\bsnowy\b
+
 [végétation]
 # Végétation, arbres, plantes, agriculture
 \bvegetation\b
