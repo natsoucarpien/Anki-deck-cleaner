@@ -32,6 +32,10 @@
 # Architecture spécifique des bâtiments
 \barchitecture\b
 \broof\b
+\bwall\b
+\bwalls\b
+\bbuilding\b
+\bbuildings\b
 \bshrine\b
 \btemple\b
 \bchurch\b
@@ -48,8 +52,14 @@
 \bpaysage\b
 \bmontagne\b
 \bmountain\b
+\bmountains\b
+\bpeak\b
+\bpeaks\b
+\bridge\b
 \bmarais\b
 \bswamp\b
+\bsoil\b
+\bdirt\b
 \bhill\b
 \bvalley\b
 \bdesert\b
@@ -73,6 +83,7 @@
 [bollard]
 # Bollards et poteaux spécifiques
 \bbollard\b
+\bbollards\b
 \bborne\b
 \bpost\b
 \breflector\b
@@ -132,6 +143,11 @@
 \brift\b
 \btrekker\b
 
+[trekker]
+# Images Google Trekker (randonnée, sentiers)
+\btrekker\b
+\btrekkers\b
+
 # ============================================================
 # NATURE ET ENVIRONNEMENT
 # ============================================================
@@ -144,8 +160,11 @@
 \bagriculture\b
 \barbre\b
 \btree\b
+\btrees\b
+\bpine\b
 \bpalm\b
 \bplant\b
+\bcactus\b
 \bforest\b
 \bflower\b
 \bcrop\b

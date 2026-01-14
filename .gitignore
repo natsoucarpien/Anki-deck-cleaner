@@ -1,9 +1,10 @@
-tmpclaude-338d-cwd
-tmpclaude-6b4a-cwd
-tmpclaude-9c70-cwd
-tmpclaude-a2e5-cwd
-tmpclaude-e8ee-cwd
-tmpclaude-ea7a-cwd
-tmpclaude-ecf3-cwd
-A Learnable Botswana travail.apkg
-__pycache__/anki_deck_cleaner.cpython-313.pyc
+# Fichiers Anki (decks)
+*.apkg
+decks/
+
+# Fichiers temporaires Claude
+tmpclaude-*
+
+# Python
+__pycache__/
+*.pyc

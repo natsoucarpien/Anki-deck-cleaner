@@ -56,3 +56,12 @@
 - `tags_config.txt` : Configuration des tags
 
 **Projet fonctionnel.** Ameliorations futures a prevoir.
+
+---
+
+## Regles pour Claude
+
+**Git - fichiers a ignorer:**
+- `*.apkg` : Fichiers de decks Anki (trop volumineux, donnees utilisateur)
+- `decks/` : Dossier contenant les decks
+- `tmpclaude-*` : Fichiers temporaires de session Claude
