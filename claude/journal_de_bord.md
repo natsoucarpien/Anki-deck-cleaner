@@ -61,7 +61,7 @@
 
 ## Regles pour Claude
 
-**Git - fichiers a ignorer:**
+**Git - fichiers a ignorer (ne jamais commit/push):**
 - `*.apkg` : Fichiers de decks Anki (trop volumineux, donnees utilisateur)
-- `decks/` : Dossier contenant les decks
+- `decks/` : Stockage personnel des decks en cours d'edition
 - `tmpclaude-*` : Fichiers temporaires de session Claude
