@@ -146,6 +146,9 @@
 \brack\b
 \brift\b
 \btrekker\b
+\bfollow car\b
+\bfollow cars\b
+\bfollowing car\b
 
 [trekker]
 # Images Google Trekker (randonnée, sentiers)
