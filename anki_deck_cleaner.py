@@ -216,8 +216,8 @@ class AnkiDeckCleaner:
         import re
         
         # Étape 1 : Supprimer le bloc d'en-tête complet s'il existe
-        # Pattern générique qui fonctionne pour tous les pays (Botswana, Indonesia, etc.)
-        header_block_pattern = r'<div><div><div><h1>A Learnable [^<]*</h1>.*?Play Map.*?</a><!--\]--><!--\s*--></div></div>'
+        # Pattern générique qui fonctionne pour tous les titres (A Learnable X, Learnable X, Ultimate X, etc.)
+        header_block_pattern = r'(?:<div>)+<div><h1>[^<]+</h1>.*?Play Map.*?</a><!--\]--><!--[^>]*--></div></div>'
         text = re.sub(header_block_pattern, '', text, flags=re.DOTALL)
         
         # Étape 2 : Supprimer les divs avec compteurs (ex: <div>4 of 102 metas</div>)
