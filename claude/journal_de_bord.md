@@ -59,6 +59,39 @@
 
 ---
 
+## 2026-01-15 - Generalisation du cleaner
+
+**Probleme identifie:**
+Le pattern de detection du header etait trop restrictif :
+- Cherchait uniquement `<h1>A Learnable [pays]</h1>`
+- Ne fonctionnait pas pour les decks avec d'autres formats de titre
+
+**Decks concernes (non fonctionnels avant le fix):**
+- "A Major Bajor Chile"
+- "ALM - African Spotlights"
+- "Learnable Colombia"
+- "Ultimate Kazakhstan - Clue Collector"
+- "USA USA"
+- "A Learnable Plant World"
+
+**Solution appliquee:**
+Pattern generalise dans `anki_deck_cleaner.py` (ligne 220) :
+```python
+# Avant (trop restrictif)
+r'<div><div><div><h1>A Learnable [^<]*</h1>...'
+
+# Apres (generique)
+r'(?:<div>)+<div><h1>[^<]+</h1>...'
+```
+
+**Changements:**
+- `(?:<div>)+` : accepte un nombre variable de divs (3, 4, 5...)
+- `[^<]+` : accepte n'importe quel titre dans le `<h1>`
+
+**Resultat:** Tous les formats de decks testes fonctionnent maintenant.
+
+---
+
 ## Regles pour Claude
 
 **Git - fichiers a ignorer (ne jamais commit/push):**
