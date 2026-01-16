@@ -241,7 +241,11 @@ class AnkiDeckCleaner:
         # Étape 5b : Supprimer "Description and images taken from: [lien]"
         description_pattern = r'Description and images taken from:\s+<a[^>]*>.*?</a>\.?'
         text = re.sub(description_pattern, '', text, flags=re.DOTALL | re.IGNORECASE)
-        
+
+        # Étape 5c : Supprimer "Source: [lien]" (ex: Source: PlonkIt)
+        source_pattern = r'<div>(?:<!--[^>]*-->)*<p>Source:\s*<a[^>]*>[^<]*</a></p>(?:<!--[^>]*-->)*</div>'
+        text = re.sub(source_pattern, '', text, flags=re.DOTALL | re.IGNORECASE)
+
         # Étape 6 : Supprimer l'icône d'image (SVG avec path contenant "M5 21q-.825...")
         # C'est le petit symbole d'image qui s'affiche
         image_icon_pattern = r'<svg[^>]*>.*?<path d="M5 21q-.825 0-1\.412-.587T3 19V5.*?</svg><!--\]--><!-- -->'
@@ -260,6 +264,7 @@ class AnkiDeckCleaner:
             r'^Description and images taken from:.*$',
             r'^Images\s*$',
             r'^\(\d+\)\s*$',
+            r'^Source\s*:\s*.*$',
         ]
         
         lines = text.split('<br>')

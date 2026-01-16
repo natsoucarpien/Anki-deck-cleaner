@@ -92,6 +92,24 @@ r'(?:<div>)+<div><h1>[^<]+</h1>...'
 
 ---
 
+## 2026-01-16 - Mots-clés et nettoyage Source
+
+**Mots-clés ajoutés au tag infrastructure:**
+signpost, signposts, roadway, lane, lanes, traffic, pavements, kerb, kerbs, curb, curbs, sidewalk, lamp, crossing, sign, pedestrian, streetlight, guardrail, guardrails, fence, fences, parking
+
+**Mots-clés ajoutés au tag architecture:**
+house, houses, residence, residences, residential, skyscraper, skyscrapers, tower, towers, apartment, foundation, foundations, column, columns, window, windows, entrance, entrances, shutter, shutters, floor, floors, room, rooms, hall, halls
+
+**Déplacement:** `house` retiré de infrastructure (maintenant uniquement dans architecture)
+
+**Nouveau pattern de nettoyage (anki_deck_cleaner.py):**
+Ajout étape 5c pour supprimer les lignes "Source: [lien]" (ex: Source: PlonkIt)
+```python
+source_pattern = r'<div>(?:<!--[^>]*-->)*<p>Source:\s*<a[^>]*>[^<]*</a></p>(?:<!--[^>]*-->)*</div>'
+```
+
+---
+
 ## Regles pour Claude
 
 **Git - fichiers a ignorer (ne jamais commit/push):**

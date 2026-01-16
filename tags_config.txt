@@ -26,9 +26,30 @@
 \bstreet\b
 \bpavement\b
 \bpavé\b
-\bhouse\b
 \bhay\b
 \bhaystacks\b
+\bsignpost\b
+\bsignposts\b
+\broadway\b
+\blane\b
+\blanes\b
+\btraffic\b
+\bpavements\b
+\bkerb\b
+\bkerbs\b
+\bcurb\b
+\bcurbs\b
+\bsidewalk\b
+\blamp\b
+\bcrossing\b
+\bsign\b
+\bpedestrian\b
+\bstreetlight\b
+\bguardrail\b
+\bguardrails\b
+\bfence\b
+\bfences\b
+\bparking\b
 
 [architecture]
 # Architecture spécifique des bâtiments
@@ -47,6 +68,32 @@
 \bstyle\b
 \bfaçade\b
 \bfacade\b
+\bhouse\b
+\bhouses\b
+\bresidence\b
+\bresidences\b
+\bresidential\b
+\bskyscraper\b
+\bskyscrapers\b
+\btower\b
+\btowers\b
+\bapartment\b
+\bfoundation\b
+\bfoundations\b
+\bcolumn\b
+\bcolumns\b
+\bwindow\b
+\bwindows\b
+\bentrance\b
+\bentrances\b
+\bshutter\b
+\bshutters\b
+\bfloor\b
+\bfloors\b
+\broom\b
+\brooms\b
+\bhall\b
+\bhalls\b
 
 [landscape]
 # Paysages et éléments naturels
@@ -237,7 +284,6 @@
 \bletter\b
 \bécriture\b
 \bfont\b
-\bsign\b
 
 # ============================================================
 # PAYS DU MONDE (liste exhaustive)
