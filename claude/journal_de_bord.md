@@ -110,6 +110,47 @@ source_pattern = r'<div>(?:<!--[^>]*-->)*<p>Source:\s*<a[^>]*>[^<]*</a></p>(?:<!
 
 ---
 
+## 2026-01-17 - Amelioration anki_image_cropper.py
+
+**Objectif:** Etendre les capacites du cropper d'images avec plus de flexibilite.
+
+**Nouvelles fonctionnalites:**
+
+1. **Mode Crop directionnel** - Crop depuis 4 directions:
+   - `right` : Retirer depuis la droite (comportement original)
+   - `left` : Retirer depuis la gauche
+   - `top` : Retirer depuis le haut
+   - `bottom` : Retirer depuis le bas
+
+2. **Mode Masquage de coin** - Remplir un coin avec couleur unie:
+   - 4 coins : `bottom_right`, `bottom_left`, `top_right`, `top_left`
+   - Dimensions configurables : % largeur et % hauteur (independants)
+   - Couleurs : `black` ou `white`
+
+**Modifications techniques:**
+
+- Classe `AnkiImageCropper`:
+  - Nouveaux parametres: `mode`, `direction`, `width_percent`, `height_percent`, `mask_color`
+  - Constantes de classe pour modes, directions, coins et couleurs
+  - `crop_image()` renomme en `process_image()` (dispatche vers crop ou mask)
+  - `_crop_directional()` : logique de crop selon direction
+  - `_mask_corner()` : dessine rectangle colore avec PIL.ImageDraw
+  - `crop_all_images()` renomme en `process_all_images()`
+
+- Fonction `main()` refactoree:
+  - Menu interactif pour choisir mode (crop/mask)
+  - Sous-menus pour options specifiques a chaque mode
+  - Helper `get_int_input()` pour saisie d'entiers avec defaut
+
+**Retour arriere si probleme:**
+Pour revenir a l'ancien comportement simple (crop droite uniquement), utiliser:
+```python
+cropper = AnkiImageCropper(input_file, crop_percent=35)
+# equivalent a: mode="crop", direction="right", crop_percent=35
+```
+
+---
+
 ## Regles pour Claude
 
 **Git - fichiers a ignorer (ne jamais commit/push):**

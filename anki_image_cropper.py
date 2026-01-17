@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Anki Image Cropper
-Crop les images (AVIF/PNG/JPEG) d'un deck Anki pour supprimer la mini-carte (droite)
+Crop les images (AVIF/PNG/JPEG) d'un deck Anki pour supprimer la mini-carte
+Supporte: crop depuis une direction (droite/gauche/haut/bas) ou masquage d'un coin
 """
 
 import zipfile
@@ -28,18 +29,51 @@ from PIL import Image
 
 
 class AnkiImageCropper:
-    """Classe pour cropper les images d'un deck Anki"""
+    """Classe pour cropper ou masquer les images d'un deck Anki"""
 
-    def __init__(self, input_file, crop_percent=30):
+    # Modes disponibles
+    MODE_CROP = "crop"
+    MODE_MASK = "mask"
+
+    # Directions de crop
+    DIR_RIGHT = "right"
+    DIR_LEFT = "left"
+    DIR_TOP = "top"
+    DIR_BOTTOM = "bottom"
+
+    # Coins pour masquage
+    CORNER_TOP_LEFT = "top_left"
+    CORNER_TOP_RIGHT = "top_right"
+    CORNER_BOTTOM_LEFT = "bottom_left"
+    CORNER_BOTTOM_RIGHT = "bottom_right"
+
+    # Couleurs de masque
+    COLOR_BLACK = "black"
+    COLOR_WHITE = "white"
+
+    def __init__(self, input_file, mode=MODE_CROP, direction=DIR_RIGHT,
+                 crop_percent=35, width_percent=35, height_percent=35,
+                 mask_color=COLOR_BLACK):
         """
         Initialise le cropper
 
         Args:
             input_file: Chemin vers le fichier .apkg
-            crop_percent: Pourcentage a retirer depuis la droite (defaut: 30%)
+            mode: "crop" pour recadrer, "mask" pour masquer un coin
+            direction: Pour crop: "right", "left", "top", "bottom"
+                       Pour mask: "top_left", "top_right", "bottom_left", "bottom_right"
+            crop_percent: Pourcentage a retirer (pour mode crop)
+            width_percent: Pourcentage de largeur du masque (pour mode mask)
+            height_percent: Pourcentage de hauteur du masque (pour mode mask)
+            mask_color: "black" ou "white" (pour mode mask)
         """
         self.input_file = Path(input_file)
+        self.mode = mode
+        self.direction = direction
         self.crop_percent = crop_percent
+        self.width_percent = width_percent
+        self.height_percent = height_percent
+        self.mask_color = mask_color
         self.temp_dir = Path("temp_anki_crop")
 
         if not self.input_file.exists():
@@ -124,9 +158,9 @@ class AnkiImageCropper:
         print(f"Trouve {len(images)} images")
         return images
 
-    def crop_image(self, image_info):
+    def process_image(self, image_info):
         """
-        Crop une image en retirant X% depuis la droite
+        Traite une image selon le mode choisi (crop ou mask)
 
         Args:
             image_info: Dict avec 'path', 'type', 'compressed'
@@ -149,26 +183,25 @@ class AnkiImageCropper:
 
             # Ouvrir l'image
             img = Image.open(BytesIO(data))
-            original_width, height = img.size
+            width, height = img.size
 
-            # Calculer la nouvelle largeur
-            new_width = int(original_width * (100 - self.crop_percent) / 100)
-
-            # Crop: garder la partie gauche
-            cropped = img.crop((0, 0, new_width, height))
+            if self.mode == self.MODE_CROP:
+                result = self._crop_directional(img, width, height)
+            else:
+                result = self._mask_corner(img, width, height)
 
             # Sauvegarder dans le bon format
             output = BytesIO()
             if img_type == 'png':
-                cropped.save(output, 'PNG')
+                result.save(output, 'PNG')
             elif img_type == 'jpeg':
-                if cropped.mode in ('RGBA', 'P'):
-                    cropped = cropped.convert('RGB')
-                cropped.save(output, 'JPEG', quality=85)
+                if result.mode in ('RGBA', 'P'):
+                    result = result.convert('RGB')
+                result.save(output, 'JPEG', quality=85)
             else:  # avif
-                if cropped.mode in ('RGBA', 'P'):
-                    cropped = cropped.convert('RGB')
-                cropped.save(output, 'AVIF', quality=80)
+                if result.mode in ('RGBA', 'P'):
+                    result = result.convert('RGB')
+                result.save(output, 'AVIF', quality=80)
 
             # Recompresser si necessaire
             result_data = output.getvalue()
@@ -185,21 +218,117 @@ class AnkiImageCropper:
             print(f"  Erreur: {e}")
             return False
 
-    def crop_all_images(self):
-        """Crop toutes les images du deck"""
+    def _crop_directional(self, img, width, height):
+        """
+        Crop l'image depuis une direction donnee
+
+        Args:
+            img: Image PIL
+            width: Largeur originale
+            height: Hauteur originale
+
+        Returns:
+            Image croppee
+        """
+        if self.direction == self.DIR_RIGHT:
+            # Retirer depuis la droite
+            new_width = int(width * (100 - self.crop_percent) / 100)
+            return img.crop((0, 0, new_width, height))
+
+        elif self.direction == self.DIR_LEFT:
+            # Retirer depuis la gauche
+            crop_width = int(width * self.crop_percent / 100)
+            return img.crop((crop_width, 0, width, height))
+
+        elif self.direction == self.DIR_TOP:
+            # Retirer depuis le haut
+            crop_height = int(height * self.crop_percent / 100)
+            return img.crop((0, crop_height, width, height))
+
+        elif self.direction == self.DIR_BOTTOM:
+            # Retirer depuis le bas
+            new_height = int(height * (100 - self.crop_percent) / 100)
+            return img.crop((0, 0, width, new_height))
+
+        return img
+
+    def _mask_corner(self, img, width, height):
+        """
+        Masque un coin de l'image avec une couleur unie
+
+        Args:
+            img: Image PIL
+            width: Largeur originale
+            height: Hauteur originale
+
+        Returns:
+            Image avec le coin masque
+        """
+        from PIL import ImageDraw
+
+        # Copier l'image pour ne pas modifier l'originale
+        result = img.copy()
+        draw = ImageDraw.Draw(result)
+
+        # Determiner la couleur
+        color = (0, 0, 0) if self.mask_color == self.COLOR_BLACK else (255, 255, 255)
+        if img.mode == 'RGBA':
+            color = color + (255,)
+
+        # Calculer les dimensions du masque
+        mask_width = int(width * self.width_percent / 100)
+        mask_height = int(height * self.height_percent / 100)
+
+        # Dessiner le rectangle selon le coin choisi
+        if self.direction == self.CORNER_TOP_LEFT:
+            draw.rectangle([0, 0, mask_width, mask_height], fill=color)
+
+        elif self.direction == self.CORNER_TOP_RIGHT:
+            draw.rectangle([width - mask_width, 0, width, mask_height], fill=color)
+
+        elif self.direction == self.CORNER_BOTTOM_LEFT:
+            draw.rectangle([0, height - mask_height, mask_width, height], fill=color)
+
+        elif self.direction == self.CORNER_BOTTOM_RIGHT:
+            draw.rectangle([width - mask_width, height - mask_height, width, height], fill=color)
+
+        return result
+
+    def process_all_images(self):
+        """Traite toutes les images du deck selon le mode choisi"""
         images = self.find_media_files()
 
         if not images:
             print("Aucune image a traiter")
             return 0
 
-        print(f"\nCrop de {len(images)} images ({self.crop_percent}% depuis la droite)...")
+        # Message adapte au mode
+        if self.mode == self.MODE_CROP:
+            direction_names = {
+                self.DIR_RIGHT: "droite",
+                self.DIR_LEFT: "gauche",
+                self.DIR_TOP: "haut",
+                self.DIR_BOTTOM: "bas"
+            }
+            dir_name = direction_names.get(self.direction, self.direction)
+            print(f"\nCrop de {len(images)} images ({self.crop_percent}% depuis {dir_name})...")
+        else:
+            corner_names = {
+                self.CORNER_TOP_LEFT: "haut-gauche",
+                self.CORNER_TOP_RIGHT: "haut-droite",
+                self.CORNER_BOTTOM_LEFT: "bas-gauche",
+                self.CORNER_BOTTOM_RIGHT: "bas-droite"
+            }
+            corner_name = corner_names.get(self.direction, self.direction)
+            color_name = "noir" if self.mask_color == self.COLOR_BLACK else "blanc"
+            print(f"\nMasquage coin {corner_name} de {len(images)} images "
+                  f"({self.width_percent}% x {self.height_percent}%, {color_name})...")
 
         success_count = 0
         for i, img_info in enumerate(images, 1):
             print(f"  [{i}/{len(images)}] {img_info['id']}.{img_info['type']}", end="")
 
-            if self.crop_image(img_info):
+            if self.process_image(img_info):
                 print(" - OK")
                 success_count += 1
             else:
@@ -232,68 +361,139 @@ class AnkiImageCropper:
 
     def process(self, output_file=None):
         """
-        Processus complet de crop
+        Processus complet de traitement
 
         Args:
             output_file: Nom du fichier de sortie (optionnel)
 
         Returns:
-            Chemin vers le fichier croppe
+            Chemin vers le fichier traite
         """
         try:
             self.extract_apkg()
-            cropped_count = self.crop_all_images()
+            processed_count = self.process_all_images()
 
-            if cropped_count > 0:
+            if processed_count > 0:
                 output_path = self.create_cropped_apkg(output_file)
                 return output_path
             else:
-                print("Aucune image croppee, pas de fichier genere")
+                print("Aucune image traitee, pas de fichier genere")
                 return None
         finally:
             self.cleanup()
+
+
+def get_int_input(prompt, default, min_val=1, max_val=90):
+    """Demande un entier a l'utilisateur avec valeur par defaut"""
+    user_input = input(prompt).strip()
+    try:
+        value = int(user_input) if user_input else default
+    except ValueError:
+        value = default
+    if value < min_val or value > max_val:
+        print(f"Valeur invalide, utilisation de {default}%")
+        value = default
+    return value
 
 
 def main():
     """Fonction principale"""
     print("=" * 60)
     print("ANKI IMAGE CROPPER")
-    print("Supprime la mini-carte (droite) des images")
+    print("Crop ou masque les images d'un deck Anki")
     print("=" * 60)
     print()
 
     # Demander le fichier
     input_file = input("Chemin vers le fichier .apkg : ").strip().strip('"').strip("'")
-
-    # Demander le pourcentage
-    print()
-    print("Pourcentage a retirer depuis la droite (defaut: 30%)")
-    crop_input = input("Pourcentage [30] : ").strip()
-
-    try:
-        crop_percent = int(crop_input) if crop_input else 30
-    except ValueError:
-        crop_percent = 30
-
-    if crop_percent < 1 or crop_percent > 90:
-        print("Pourcentage invalide, utilisation de 30%")
-        crop_percent = 30
-
     print()
 
+    # Choix du mode
+    print("Mode de traitement:")
+    print("  1. Crop (recadrer l'image)")
+    print("  2. Masquer un coin")
+    mode_input = input("Choix [1] : ").strip()
+    mode = AnkiImageCropper.MODE_MASK if mode_input == "2" else AnkiImageCropper.MODE_CROP
+    print()
+
+    if mode == AnkiImageCropper.MODE_CROP:
+        # Options pour le crop
+        print("Direction du crop (bord a retirer):")
+        print("  1. Droite")
+        print("  2. Gauche")
+        print("  3. Haut")
+        print("  4. Bas")
+        dir_input = input("Choix [1] : ").strip()
+
+        directions = {
+            "1": AnkiImageCropper.DIR_RIGHT,
+            "2": AnkiImageCropper.DIR_LEFT,
+            "3": AnkiImageCropper.DIR_TOP,
+            "4": AnkiImageCropper.DIR_BOTTOM
+        }
+        direction = directions.get(dir_input, AnkiImageCropper.DIR_RIGHT)
+        print()
+
+        crop_percent = get_int_input("Pourcentage a retirer [35] : ", 35)
+        print()
+
+        cropper = AnkiImageCropper(
+            input_file,
+            mode=mode,
+            direction=direction,
+            crop_percent=crop_percent
+        )
+
+    else:
+        # Options pour le masquage
+        print("Coin a masquer:")
+        print("  1. Bas-droite")
+        print("  2. Bas-gauche")
+        print("  3. Haut-droite")
+        print("  4. Haut-gauche")
+        corner_input = input("Choix [1] : ").strip()
+
+        corners = {
+            "1": AnkiImageCropper.CORNER_BOTTOM_RIGHT,
+            "2": AnkiImageCropper.CORNER_BOTTOM_LEFT,
+            "3": AnkiImageCropper.CORNER_TOP_RIGHT,
+            "4": AnkiImageCropper.CORNER_TOP_LEFT
+        }
+        direction = corners.get(corner_input, AnkiImageCropper.CORNER_BOTTOM_RIGHT)
+        print()
+
+        width_percent = get_int_input("Largeur du masque en % [35] : ", 35)
+        height_percent = get_int_input("Hauteur du masque en % [35] : ", 35)
+        print()
+
+        print("Couleur du masque:")
+        print("  1. Noir")
+        print("  2. Blanc")
+        color_input = input("Choix [1] : ").strip()
+        mask_color = AnkiImageCropper.COLOR_WHITE if color_input == "2" else AnkiImageCropper.COLOR_BLACK
+        print()
+
+        cropper = AnkiImageCropper(
+            input_file,
+            mode=mode,
+            direction=direction,
+            width_percent=width_percent,
+            height_percent=height_percent,
+            mask_color=mask_color
+        )
+
     try:
-        cropper = AnkiImageCropper(input_file, crop_percent)
         output_path = cropper.process()
 
         print()
         print("=" * 60)
         if output_path:
-            print("CROP TERMINE AVEC SUCCES !")
+            print("TRAITEMENT TERMINE AVEC SUCCES !")
             print("=" * 60)
             print(f"Fichier original : {input_file}")
-            print(f"Fichier croppe   : {output_path}")
+            print(f"Fichier traite   : {output_path}")
             print()
-            print("Vous pouvez importer le fichier croppe dans Anki.")
+            print("Vous pouvez importer le fichier dans Anki.")
         else:
             print("AUCUNE IMAGE TRAITEE")
             print("=" * 60)
