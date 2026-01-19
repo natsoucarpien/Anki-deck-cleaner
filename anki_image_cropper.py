@@ -266,6 +266,10 @@ class AnkiImageCropper:
         """
         from PIL import ImageDraw
 
+        # Convertir les images en mode palette (P) en RGB/RGBA pour permettre le dessin
+        if img.mode == 'P':
+            img = img.convert('RGBA' if 'transparency' in img.info else 'RGB')
+
         # Copier l'image pour ne pas modifier l'originale
         result = img.copy()
         draw = ImageDraw.Draw(result)

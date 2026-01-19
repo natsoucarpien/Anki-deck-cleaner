@@ -151,6 +151,23 @@ cropper = AnkiImageCropper(input_file, crop_percent=35)
 
 ---
 
+## 2026-01-19 - Fix masquage coin sur images palette
+
+**Probleme:** Erreur "cannot allocate more than 256 colors" lors du masquage de coin sur certaines images PNG.
+
+**Cause:** Les images PNG en mode "P" (palette indexee, 256 couleurs max) ne permettent pas de dessiner avec des couleurs RGB directement. `ImageDraw.rectangle()` echouait car PIL ne peut pas ajouter de couleur a une palette pleine.
+
+**Solution appliquee** (`anki_image_cropper.py`, ligne 269-271):
+```python
+# Convertir les images en mode palette (P) en RGB/RGBA pour permettre le dessin
+if img.mode == 'P':
+    img = img.convert('RGBA' if 'transparency' in img.info else 'RGB')
+```
+
+**Resultat:** Le masquage fonctionne maintenant sur tous les types d'images PNG.
+
+---
+
 ## Regles pour Claude
 
 **Git - fichiers a ignorer (ne jamais commit/push):**
