@@ -4,6 +4,10 @@ decks/
 
 # Fichiers temporaires Claude
 tmpclaude-*
+.claude/
+
+# Fichier nul créé par redirection batch
+nul
 
 # Python
 __pycache__/
