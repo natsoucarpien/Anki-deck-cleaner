@@ -246,6 +246,10 @@ class AnkiDeckCleaner:
         source_pattern = r'<div>(?:<!--[^>]*-->)*<p>Source:\s*<a[^>]*>[^<]*</a></p>(?:<!--[^>]*-->)*</div>'
         text = re.sub(source_pattern, '', text, flags=re.DOTALL | re.IGNORECASE)
 
+        # Étape 5d : Supprimer "For more info, check..." (ex: check out the UK Plonkit...)
+        for_more_info_pattern = r'For more info,\s*check[^<]*(?:<a[^>]*>[^<]*</a>[^<]*)*[^<]*\.?'
+        text = re.sub(for_more_info_pattern, '', text, flags=re.DOTALL | re.IGNORECASE)
+
         # Étape 6 : Supprimer l'icône d'image (SVG avec path contenant "M5 21q-.825...")
         # C'est le petit symbole d'image qui s'affiche
         image_icon_pattern = r'<svg[^>]*>.*?<path d="M5 21q-.825 0-1\.412-.587T3 19V5.*?</svg><!--\]--><!-- -->'
@@ -265,6 +269,7 @@ class AnkiDeckCleaner:
             r'^Images\s*$',
             r'^\(\d+\)\s*$',
             r'^Source\s*:\s*.*$',
+            r'^For more info,\s*check.*$',
         ]
         
         lines = text.split('<br>')
